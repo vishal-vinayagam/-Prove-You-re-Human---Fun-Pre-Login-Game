@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🤖 Prove You're Human (Maybe)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #ff6b6b;
+      --secondary: #4cc9f0;
+      --accent: #7209b7;
+    }
+    
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      text-align: center;
+    }
+
+    /* **PRE-LOGIN GAME STYLES** */
+    .pre-login-game {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 20px;
+    }
+
+    .game-title {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .game-instructions {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    #clickerGame {
+      width: 300px;
+      height: 300px;
+      background-color: var(--secondary);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+
+    #clickerGame:hover {
+      transform: scale(1.05);
+    }
+
+    #clickerGame:active {
+      transform: scale(0.95);
+    }
+
+    #clickTarget {
+      width: 80px;
+      height: 80px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+      user-select: none;
+      position: absolute;
+      transition: all 0.1s;
+    }
+
+    #clickCounter {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      color: var(--accent);
+    }
+
+    /* **LOGIN MODAL STYLES** */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; 
+      top: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 320px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: popIn 0.3s forwards;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-content h3 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    .modal-content input:focus {
+      border-color: var(--secondary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.3);
+    }
+
+    .modal-content button {
+      width: 100%;
+      background-color: var(--primary);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .modal-content button:hover {
+      background-color: #e05555;
+      transform: translateY(-2px);
+    }
+
+    /* **POST-LOGIN CELEBRATION** */
+    .post-login {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 20px;
+    }
+
+    .trophy {
+      font-size: 100px;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .congrats-message {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .reward-button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+
+    .reward-button:hover {
+      transform: scale(1.1);
+      background-color: #8a2be2;
+    }
+
+    /* **FLOATING EMOJIS** */
+    .floating-emojis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .emoji {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0;
+      animation: float-up 5s linear forwards;
+    }
+
+    @keyframes float-up {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* **FOOTER** */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background-color: white;
+      margin-top: auto;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating emojis background -->
+<div class="floating-emojis" id="emojiContainer"></div>
+
+<!-- Pre-Login Game -->
+<div class="pre-login-game" id="preLoginGame">
+  <h1 class="game-title">🤖 Prove You're Human (Maybe)</h1>
+  <p class="game-instructions">Click the red button <strong>10 times</strong> to continue.<br>This is very important. Probably.</p>
+  
+  <div id="clickerGame">
+    <div id="clickTarget">CLICK ME!</div>
+  </div>
+  
+  <div id="clickCounter">Clicks: 0/10</div>
+</div>
+
+<!-- Login Modal (Hidden Initially) -->
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <h3>🔐 Super Serious Login 🔐</h3>
+    <p><em>(We promise this part is normal. Maybe.)</em></p>
+    <input type="email" id="email" placeholder="Your Email (We won't spam. Probably.)" required>
+    <input type="password" id="password" placeholder="Password (Don't use 'password')" required>
+    <button id="loginBtn">LOGIN (OR DON'T)</button>
+  </div>
+</div>
+
+<!-- Post-Login Celebration -->
+<div class="post-login" id="postLogin">
+  <div class="trophy">🏆</div>
+  <h2 class="congrats-message">CONGRATS! YOU DID IT!</h2>
+  <p>Your reward: <strong>ABSOLUTELY NOTHING!</strong> 🎉</p>
+  <p><em>(But here's a trophy anyway because we're nice.)</em></p>
+  <button class="reward-button" id="rewardButton">CLICK FOR A SURPRISE! (IT'S NOTHING)</button>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>Made with ❤️ and questionable life choices</p>
+  <p><small>This website serves no real purpose. Just like this footer.</small></p>
+</footer>
+
+<script>
+  // **ELEMENTS**
+  const preLoginGame = document.getElementById("preLoginGame");
+  const clickerGame = document.getElementById("clickerGame");
+  const clickTarget = document.getElementById("clickTarget");
+  const clickCounter = document.getElementById("clickCounter");
+  const loginModal = document.getElementById("loginModal");
+  const loginBtn = document.getElementById("loginBtn");
+  const postLogin = document.getElementById("postLogin");
+  const rewardButton = document.getElementById("rewardButton");
+  const emojiContainer = document.getElementById("emojiContainer");
+
+  // **GAME VARIABLES**
+  let clickCount = 0;
+  const requiredClicks = 10;
+
+  // **MOVE TARGET ON HOVER (MAKE IT ANNOYING)**
+  clickerGame.addEventListener("mousemove", (e) => {
+    if (Math.random() > 0.7) { // 30% chance to move
+      const x = Math.random() * 200;
+      const y = Math.random() * 200;
+      clickTarget.style.left = x + "px";
+      clickTarget.style.top = y + "px";
+    }
+  });
+
+  // **CLICK GAME LOGIC**
+  clickTarget.addEventListener("click", () => {
+    clickCount++;
+    clickCounter.textContent = `Clicks: ${clickCount}/${requiredClicks}`;
+    
+    // **SILLY MESSAGES**
+    const messages = [
+      "Wow. Such skill.",
+      "Are you sure you're not a robot?",
+      "This is very productive.",
+      "Only " + (requiredClicks - clickCount) + " more to go!",
+      "The FBI is impressed.",
+      "You must be very proud."
+    ];
+    
+    if (clickCount < requiredClicks) {
+      clickTarget.textContent = messages[Math.floor(Math.random() * messages.length)];
+      
+      // Move target after click
+      const x = Math.random() * 200;
+      const y = Math.random() * 200;
+      clickTarget.style.left = x + "px";
+      clickTarget.style.top = y + "px";
+      
+      // Create random emoji
+      createEmoji(['😊', '👍', '❤', '✨', '🎉', '🤩', '👋', '💌', '📩', '💬','😬','😃','😁','😆','🥹','😅','😂','🤣','☺','🥰','😍','😌','😉','🙃','🙂','😇','🤩','🥳','🥳','🥶','🤯','🤗','😎',"👍", "👏", "🎯", "🐱", "🤖"]);
+    } else {
+      // Game complete!
+      clickTarget.textContent = "OK FINE YOU WIN";
+      clickerGame.style.backgroundColor = "#4CAF50";
+      setTimeout(() => {
+        preLoginGame.style.display = "none";
+        loginModal.style.display = "flex";
+      }, 1000);
+    }
+  });
+
+  // **LOGIN LOGIC**
+  loginBtn.addEventListener("click", () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (email === "fun@gmail.com" && password === "fun") {
+      // Successful login
+      loginModal.style.display = "none";
+      postLogin.style.display = "flex";
+      
+      // Celebrate!
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          createEmoji(["🎉", "🥳", "🍾", "🎊", "🎈",'😊', '👍', '❤', '✨', '🎉', '🤩', '👋', '💌', '📩', '💬','😬','😃','😁','😆','🥹','😅','😂','🤣','☺','🥰','😍','😌','😉','🙃','🙂','😇','🤩','🥳','🥳','🥶','🤯','🤗','😎']);
+        }, i * 100);
+      }
+    } else {
+      // Failed login
+      alert("WRONG! Try this email-password combo:\nEmail: fun@gmail.com\nPassword: fun");
+    }
+  });
+
+  // **REWARD BUTTON (DOES NOTHING)**
+  rewardButton.addEventListener("click", () => {
+    alert("SURPRISE! It's nothing! 🤡\n\n(But here's a star for trying: ⭐)");
+    createEmoji([" ⭐", "🌟", "✨", "💫",'😊', '👍', '❤', '✨', '🎉', '🤩', 
+    '👋', '💌', '📩', '💬','😬','😃','😁','😆','🥹','😅','😂','🤣','☺','🥰',
+    '😍','😌','😉'
+    ,'🙃','🙂','😇','🤩','🥳','🥳','🥶','🤯','🤗','😎']);
+  });
+
+  // **CREATE FLOATING EMOJI**
+  function createEmoji(emojis) {
+    const emoji = document.createElement("div");
+    emoji.className = "emoji";
+    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    emoji.style.left = Math.random() * 100 + "vw";
+    emoji.style.animationDuration = (Math.random() * 3 + 2) + "s";
+    emojiContainer.appendChild(emoji);
+    
+    setTimeout(() => {
+      emoji.remove();
+    }, 5000);
+  }
+</script>
+</body>
+</html>
