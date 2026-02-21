@@ -1,4 +1,4 @@
-# -rove You Human-Fun-Pre-Login-Game
+# Prove You Human-Fun-Pre-Login-Game
 
 👉 🌐 Live Demo Here -> https://vishal-vinayagam.github.io/-Prove-You-re-Human---Fun-Pre-Login-Game/
 
